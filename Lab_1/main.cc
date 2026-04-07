@@ -1,47 +1,20 @@
 #include <iostream>
 #include <algorithm>
 #include <vector>
-//#include <array>
-//#include <list>
 #include <fstream>
 #include <string>
 #include <iterator>
 #include <map>
 #include <set>
+#include <iomanip>
+#include <utility>
+#include <sstream>
 
 // std::for_each(arguments.begin(), arguments.end(), [&v](const std::string &argument) {  
 //     auto it = std::find_if(argument.begin(), argument.end(), [](char a) { return a == '='; });
 //     v.push_back( std::string{it + 1 , argument.end()} );
 // });
 
-// class Parameter{
-// public:
-//     Parameter(std::vector<std::string> const& parameter, std::vector<std::string> const& text)
-//     :parameter{parameter}, text{text} {}
-
-// private:
-//     std::vector<std::string> parameter { };
-//     std::vector<std::string> text{};
-// };
-
-// class Flag{
-// public:
-//     Flag(std::vector<std::string> const& flag, std::vector<std::string> const& text)
-//     :flag{flag}, text{text} {}
-
-//     void print() const{
-//         std::copy(text.begin(), text.end(),
-//         std::ostream_iterator<std::string>{ std::cout, "\n" });
-//     }
-
-//     void frequency() const{
-
-//     }
-
-// private:
-//     std::vector<std::string> flag { };
-//     std::vector<std::string> text{};
-// };
 std::string find_operation(std::string const& argument){
     auto it = std::find(argument.begin(), argument.end(), '=');
     return std::string {argument.begin() , it};;
@@ -65,25 +38,26 @@ void print (std::vector<std::string> text){
 }
 
 void frequency(std::vector<std::string> text){
-    std::map<std::string, int> table{};
-    std::for_each(text.begin(), text.end(), [&table](const std::string &word){
-        ++table[word];
-    });
-    std::set<int> set_of_ints{};
+    std::map<std::string, int> table{ };
+    std::vector<std::pair<std::string, int> > word_count; 
+    size_t max_len{ };
 
-    std::for_each(text.begin(), text.end(), [&table, &set_of_ints](const std::string &word){
-        set_of_ints.insert(table[word]);
-    });
+    std::for_each(text.begin(), text.end(), [&table, &max_len](const std::string &word){
+       ++table[word];
 
-    int n {set_of_ints.max()};
-    std::for_each(text.begin(), text.end(), [&table, &set_of_ints, &n](const std::string &word){
-        std::cout << std::endl;
-        --n;
+        if(word.size() > max_len ){ 
+            max_len = word.size();
+        }
     });
 
-    std::copy(text.begin(), text.end(),
-    std::ostream_iterator<std::string>{ std::cout, " " });
+    copy(table.begin(), table.end(), back_inserter(word_count));
+    sort(word_count.begin(), word_count.end(), [](auto const a, auto const b){ 
+        return a.second > b.second;
+    });
 
+    std::for_each(word_count.begin(), word_count.end(), [max_len](auto const a){ 
+        std::cout << std::setw(max_len) << a.first << ' ' << a.second << std::endl;
+    });
 }
 
 void execute_flags(std::vector<std::string> const& arguments,
@@ -109,25 +83,12 @@ void execute_flags(std::vector<std::string> const& arguments,
     });
 }
 
-// std::map<std::string, bool> read_flags(std::vector<std::string> const& arguments){
-//     std::vector<std::string> parameter_list { };
-//     std::vector<std::string> flag_list      { };
-
-//     std::map<std::string, bool> temp{ read_each(arguments) }; 
-    
-//     return temp;
-//     // std::copy(parameter.begin(), parameter.end(),
-//     // std::ostream_iterator<std::string>{ std::cout, "\n" });  
-// }
-
 std::vector<std::string> get_flags(int argc, char* argv[]){
     std::vector<std::string> arguments(argc - 2);
     std::copy( &argv[2] , &argv[argc], arguments.begin() );
 
     return arguments;
 }
-
-
 
 bool is_a_file(int const argc, std::string const& first_arg){
     if (argc >= 1){
@@ -153,13 +114,11 @@ int main(int argc, char* argv[]){
 
     if (is_a_file(argc, argv[1])){
         arguments = get_flags(argc, argv);
-        //text      = get_file (argv[1]);
     }
     else{
-        throw std::logic_error("Not a txt file");
+        throw std::logic_error("Not a txt file"); //fixa, kanske ska skrivas ut
     }
 
-    //std::map<std::string, bool> operators_flags { read_flags (arguments) };
     execute_flags (arguments , argv[1]);
 
     return 0;
