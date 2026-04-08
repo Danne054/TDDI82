@@ -5,19 +5,18 @@
 #include <string>
 #include <iterator>
 #include <map>
-#include <set>
 #include <iomanip>
 #include <utility>
-#include <sstream>
 
-// std::for_each(arguments.begin(), arguments.end(), [&v](const std::string &argument) {  
-//     auto it = std::find_if(argument.begin(), argument.end(), [](char a) { return a == '='; });
-//     v.push_back( std::string{it + 1 , argument.end()} );
-// });
-
-std::string find_operation(std::string const& argument){
+std::string find_operation(std::string const& argument, bool const end_part){
+    std::string temp{ argument };
     auto it = std::find(argument.begin(), argument.end(), '=');
-    return std::string {argument.begin() , it};;
+
+    if (end_part){
+        return std::string { it + 1, argument.end() };
+    }
+
+    return std::string { argument.begin() , it };
 }
 
 std::vector<std::string> get_file(std::string const& file_name){
@@ -32,36 +31,72 @@ std::vector<std::string> get_file(std::string const& file_name){
     return words;
 }
 
-void print (std::vector<std::string> text){
-    std::copy(text.begin(), text.end(),
-    std::ostream_iterator<std::string>{ std::cout, " " });  
-}
-
-void frequency(std::vector<std::string> text){
-    std::map<std::string, int> table{ };
-    std::vector<std::pair<std::string, int> > word_count; 
-    size_t max_len{ };
-
+void add_to_map(std::vector<std::string> const& text, std::map<std::string, int> & table, size_t & max_len){
     std::for_each(text.begin(), text.end(), [&table, &max_len](const std::string &word){
-       ++table[word];
-
+        ++table[word];
+       
         if(word.size() > max_len ){ 
             max_len = word.size();
         }
     });
+}
 
-    copy(table.begin(), table.end(), back_inserter(word_count));
-    sort(word_count.begin(), word_count.end(), [](auto const a, auto const b){ 
-        return a.second > b.second;
-    });
+void print (std::vector<std::string> const& text){
+    std::copy(text.begin(), text.end(),
+    std::ostream_iterator<std::string>{ std::cout, " " });  
+}
 
-    std::for_each(word_count.begin(), word_count.end(), [max_len](auto const a){ 
+void table(std::vector<std::string> const& text){
+    std::map<std::string, int> table{ };
+    size_t max_len{ };
+
+    add_to_map(text, table, max_len);
+
+    std::for_each(table.begin(), table.end(), [max_len](std::pair<std::string, int> const a){ 
         std::cout << std::setw(max_len) << a.first << ' ' << a.second << std::endl;
     });
 }
 
-void execute_flags(std::vector<std::string> const& arguments,
-                   std::string const& file_name){
+void frequency(std::vector<std::string> const& text){
+    std::map<std::string, int> table{ };
+    std::vector<std::pair<std::string, int> > word_count; 
+    size_t max_len{ };
+
+    add_to_map(text, table, max_len);
+
+    copy(table.begin(), table.end(), back_inserter(word_count));
+    sort(word_count.begin(), word_count.end(), 
+        [](std::pair<std::string, int> const a, std::pair<std::string, int> const b){ 
+        return a.second > b.second;
+    });
+
+    std::for_each(word_count.begin(), word_count.end(), [max_len](std::pair<std::string, int> const a){ 
+        std::cout << std::setw(max_len) << a.first << ' ' << a.second << std::endl;
+    });
+}
+
+void substitute(std::vector<std::string> & text, std::string const& argument){
+    std::string replace_with{ find_operation(argument, true) };
+
+    auto it = std::find_if(replace_with.begin(), replace_with.end(), [](char a) { return a == '+'; });
+
+    std::string old_word{ replace_with.begin(), it};
+    std::string new_word{ it + 1, replace_with.end() };
+
+    std::replace(text.begin(), text.end(), old_word, new_word);
+}
+
+void remove(std::vector<std::string> & text, std::string const& argument){
+    std::string remove_word{ find_operation(argument, true) };
+
+    text.erase( std::remove_if(text.begin(), text.end(), 
+    [remove_word](std::string const& a) { 
+        return a == remove_word; 
+    })
+    , text.end() );
+}
+
+void execute_flags(std::vector<std::string> const& arguments, std::string const& file_name){
     std::vector<std::string> text  { get_file (file_name) };
     
     std::for_each(arguments.begin(), arguments.end(), [&text](const std::string &argument) {  
@@ -69,16 +104,16 @@ void execute_flags(std::vector<std::string> const& arguments,
             print(text);
         }
         else if(argument == "--table"){
-            //table();
+            table(text);
         }
         else if(argument == "--frequency"){
             frequency(text);
         }
-        else if(find_operation(argument) == "--substitute=" ){
-            
+        else if(find_operation(argument, false) == "--substitute" ){
+            substitute(text, argument);
         }
-        else if(find_operation(argument) == "--remove="){
-
+        else if(find_operation(argument, false) == "--remove"){
+            remove(text, argument);
         }
     });
 }
