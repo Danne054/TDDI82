@@ -20,14 +20,17 @@ std::string find_operation(std::string const& argument, bool const end_part){
 }
 
 std::vector<std::string> get_file(std::string const& file_name){
-    std::ifstream ifs{};
-    ifs.open(file_name);
+    std::ifstream              ifs{};
     std::vector<std::string> words{};
 
+    ifs.open(file_name);
+    if (ifs.fail()){ std::cout << file_name << " not found" << std::endl; }
+    
     std::copy(std::istream_iterator<std::string>{ ifs }, 
               std::istream_iterator<std::string>{ }, 
               std::back_inserter(words));
 
+    ifs.close();
     return words;
 }
 
@@ -96,29 +99,19 @@ void remove(std::vector<std::string> & text, std::string const& argument){
     , text.end() );
 }
 
-void execute_flags(std::vector<std::string> const& arguments, std::string const& file_name){
+void execute_flags_operators(std::vector<std::string> const& arguments, std::string const& file_name){
     std::vector<std::string> text  { get_file (file_name) };
     
     std::for_each(arguments.begin(), arguments.end(), [&text](const std::string &argument) {  
-        if(argument == "--print"){
-            print(text);
-        }
-        else if(argument == "--table"){
-            table(text);
-        }
-        else if(argument == "--frequency"){
-            frequency(text);
-        }
-        else if(find_operation(argument, false) == "--substitute" ){
-            substitute(text, argument);
-        }
-        else if(find_operation(argument, false) == "--remove"){
-            remove(text, argument);
-        }
+        if (argument == "--print"){ print(text); }
+        else if (argument == "--table"){ table(text); }
+        else if (argument == "--frequency"){ frequency(text); }
+        else if (find_operation(argument, false) == "--substitute" ){ substitute(text, argument); }
+        else if (find_operation(argument, false) == "--remove"){ remove(text, argument); }
     });
 }
 
-std::vector<std::string> get_flags(int argc, char* argv[]){
+std::vector<std::string> get_flags_operators(int argc, char* argv[]){
     std::vector<std::string> arguments(argc - 2);
     std::copy( &argv[2] , &argv[argc], arguments.begin() );
 
@@ -146,15 +139,16 @@ bool is_a_file(int const argc, std::string const& first_arg){
 int main(int argc, char* argv[]){
     std::vector<std::string> text      {};
     std::vector<std::string> arguments {};
-
+    
     if (is_a_file(argc, argv[1])){
-        arguments = get_flags(argc, argv);
+        arguments = get_flags_operators(argc, argv);
     }
     else{
-        throw std::logic_error("Not a txt file"); //fixa, kanske ska skrivas ut
+        std::cout << "file name not valid" << std::endl; //fixa, kanske ska skrivas ut
+        return 0;
     }
 
-    execute_flags (arguments , argv[1]);
+    execute_flags_operators (arguments , argv[1]);
 
     return 0;
 }
