@@ -78,7 +78,7 @@ void frequency(std::vector<std::string> const& text){
 void substitute(std::vector<std::string> & text, std::string const& argument){
     std::string replace_with{ find_operation(argument, true) };
 
-    auto it = std::find_if(replace_with.begin(), replace_with.end(), [](char a) { return a == '+'; });
+    auto it = std::find(replace_with.begin(), replace_with.end(), '+');
 
     std::string old_word{ replace_with.begin(), it};
     std::string new_word{ it + 1, replace_with.end() };
@@ -89,17 +89,13 @@ void substitute(std::vector<std::string> & text, std::string const& argument){
 void remove(std::vector<std::string> & text, std::string const& argument){
     std::string remove_word{ find_operation(argument, true) };
 
-    text.erase( std::remove_if(text.begin(), text.end(), 
-    [remove_word](std::string const& a) { 
-        return a == remove_word; 
-    })
-    , text.end() );
+    text.erase( std::remove(text.begin(), text.end(), remove_word), text.end() );
 }
 
 void execute_flags(std::vector<std::string> const& arguments, std::string const& file_name){
     std::vector<std::string> text  { get_file (file_name) };
     
-    std::for_each(arguments.begin(), arguments.end(), [&text](const std::string &argument) {  
+    std::for_each(arguments.begin(), arguments.end(), [&text](const std::string &argument) {
         if(argument == "--print"){
             print(text);
         }
@@ -127,7 +123,7 @@ std::vector<std::string> get_flags(int argc, char* argv[]){
 
 bool is_a_file(int const argc, std::string const& first_arg){
     if (argc >= 1){
-        auto it = std::find_if(first_arg.begin(), first_arg.end(), [](char a) { return a == '.'; });
+        auto it = std::find(first_arg.begin(), first_arg.end(), '.');
 
         std::string test_end{};
         std::copy(it, first_arg.end(), std::back_inserter (test_end) );
