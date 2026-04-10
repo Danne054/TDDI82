@@ -98,7 +98,7 @@ void remove(std::vector<std::string> & text, std::string const& argument){
 void execute_flags_operators(std::vector<std::string> const& arguments, std::string const& file_name){
     std::vector<std::string> text  { get_file (file_name) };
     
-<<<<<<< HEAD
+
     std::for_each(arguments.begin(), arguments.end(), [&text](const std::string &argument) {
         if(argument == "--print"){
             print(text);
@@ -115,14 +115,7 @@ void execute_flags_operators(std::vector<std::string> const& arguments, std::str
         else if(find_operation(argument, false) == "--remove"){
             remove(text, argument);
         }
-=======
-    std::for_each(arguments.begin(), arguments.end(), [&text](const std::string &argument) {  
-        if (argument == "--print"){ print(text); }
-        else if (argument == "--table"){ table(text); }
-        else if (argument == "--frequency"){ frequency(text); }
-        else if (find_operation(argument, false) == "--substitute" ){ substitute(text, argument); }
-        else if (find_operation(argument, false) == "--remove"){ remove(text, argument); }
->>>>>>> e352fb100bcdbada8728b0f332070b5a530504e4
+
     });
 }
 
