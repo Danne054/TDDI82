@@ -6,10 +6,9 @@
 #include <iterator>
 #include <map>
 #include <iomanip>
-#include <utility>
 
 std::string find_operation(std::string const& argument, bool const end_part){
-    std::string temp{ argument };
+    std::string temp { argument };
     auto it = std::find(argument.begin(), argument.end(), '=');
 
     if (end_part){
@@ -38,9 +37,7 @@ void add_to_map(std::vector<std::string> const& text, std::map<std::string, int>
     std::for_each(text.begin(), text.end(), [&table, &max_len](const std::string &word){
         ++table[word];
        
-        if(word.size() > max_len ){ 
-            max_len = word.size();
-        }
+        if(word.size() > max_len ){ max_len = word.size(); }
     });
 }
 
@@ -50,9 +47,9 @@ void print (std::vector<std::string> const& text){
 }
 
 void table(std::vector<std::string> const& text){
-    std::map<std::string, int> table{ };
-    size_t max_len{ };
-
+    std::map<std::string, int> table { };
+    size_t max_len { };
+ 
     add_to_map(text, table, max_len);
 
     std::for_each(table.begin(), table.end(), [max_len](std::pair<std::string, int> const a){ 
@@ -61,9 +58,9 @@ void table(std::vector<std::string> const& text){
 }
 
 void frequency(std::vector<std::string> const& text){
-    std::map<std::string, int> table{ };
-    std::vector<std::pair<std::string, int> > word_count; 
-    size_t max_len{ };
+    std::vector<std::pair<std::string, int> > word_count { }; 
+    std::map<std::string, int> table { };
+    size_t max_len { };
 
     add_to_map(text, table, max_len);
 
@@ -79,26 +76,25 @@ void frequency(std::vector<std::string> const& text){
 }
 
 void substitute(std::vector<std::string> & text, std::string const& argument){
-    std::string replace_with{ find_operation(argument, true) };
+    std::string replace_with { find_operation(argument, true) };
 
     auto it = std::find(replace_with.begin(), replace_with.end(), '+');
 
-    std::string old_word{ replace_with.begin(), it};
-    std::string new_word{ it + 1, replace_with.end() };
+    std::string old_word { replace_with.begin(), it };
+    std::string new_word { it + 1, replace_with.end() };
 
     std::replace(text.begin(), text.end(), old_word, new_word);
 }
 
 void remove(std::vector<std::string> & text, std::string const& argument){
-    std::string remove_word{ find_operation(argument, true) };
+    std::string remove_word { find_operation(argument, true) };
 
     text.erase( std::remove(text.begin(), text.end(), remove_word), text.end() );
 }
 
 void execute_flags_operators(std::vector<std::string> const& arguments, std::string const& file_name){
-    std::vector<std::string> text  { get_file (file_name) };
+    std::vector<std::string> text { get_file (file_name) };
     
-
     std::for_each(arguments.begin(), arguments.end(), [&text](const std::string &argument) {
         if(argument == "--print"){
             print(text);
@@ -128,31 +124,21 @@ std::vector<std::string> get_flags_operators(int argc, char* argv[]){
 
 bool is_a_file(int const argc, std::string const& first_arg){
     if (argc >= 1){
-        auto it = std::find(first_arg.begin(), first_arg.end(), '.');
-
-        std::string test_end{};
-        std::copy(it, first_arg.end(), std::back_inserter (test_end) );
-
-        std::string new_test{};
-        std::copy(first_arg.begin(), it, std::back_inserter (new_test) );
-        
-        if(test_end == ".txt"){
-            return true;
-        }
+        return  std::string { std::find(first_arg.begin(), first_arg.end(), '.'), first_arg.end() } == ".txt";
     }
 
     return false;
 }
 
 int main(int argc, char* argv[]){
-    std::vector<std::string> text      {};
-    std::vector<std::string> arguments {};
+    std::vector<std::string> text      { };
+    std::vector<std::string> arguments { };
     
     if (is_a_file(argc, argv[1])){
         arguments = get_flags_operators(argc, argv);
     }
     else{
-        std::cout << "file name not valid" << std::endl; //fixa, kanske ska skrivas ut
+        std::cout << "file name not valid or type" << std::endl; //fixa, kanske ska skrivas ut
         return 0;
     }
 
