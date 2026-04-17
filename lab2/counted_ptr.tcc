@@ -104,7 +104,12 @@ T* counted_ptr<T>::operator->()
 {
     return data;
 }
-//const variant av T*
+
+template <typename T>
+T const* counted_ptr<T>::operator->() const
+{
+    return data;
+}
 
 template <typename T>
 bool counted_ptr<T>::operator==(counted_ptr<T> const& other) const

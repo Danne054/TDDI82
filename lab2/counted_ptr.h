@@ -41,6 +41,7 @@ public:
     T operator*() const;
 
     T* operator->();
+    T const* operator->() const;
     // T& operator->() const;
 
     //jämför med samma obj

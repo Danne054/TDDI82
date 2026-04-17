@@ -66,14 +66,21 @@ int main()
     {
         counted_ptr<int> p1{new int{8}};
         counted_ptr<int> p2{new int{55}};
-        auto p3 {p1.get()};
         p2 = std::move(p1);
         assert(p1 == nullptr);
         assert(p1.use_count() == 0);
         assert(*p2 == 8);
-        assert(p1 == p3);
         assert(p2.use_count() == 1);
         std::cout << "Flyttilldelning OK\n";
+    }
+    // ── get() ─────────────────────────────────────────────────────────────────────
+    {
+        int* raw = new int{55};
+        counted_ptr<int> p{raw};
+        assert(p.get() == raw);
+        assert(p.use_count() == 1);
+
+        std::cout << "get() OK\n";
     }
 
     std::cout << "\nAlla konstruktortester godkända!\n";
