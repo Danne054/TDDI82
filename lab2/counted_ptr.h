@@ -55,6 +55,8 @@ public:
     bool operator==(std::nullptr_t) const;
     bool operator!=(std::nullptr_t) const;
 
+    T* get() const;
+
 private:
     T*   data;   // Pekare till objektet
     int* count;  // Delad räknare 

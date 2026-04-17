@@ -77,12 +77,14 @@ counted_ptr<T>::~counted_ptr()
 }
 
 
-//avrefererar pekare
+//avrefererar count typ
 template <typename T>
 int counted_ptr<T>::use_count() const
 {
     if (count == nullptr)
-        return 0;
+    {
+     return 0;
+    }  
     return *count;
 }
 
@@ -98,10 +100,11 @@ T counted_ptr<T>::operator*() const
 }
 
 template <typename T>
-T* counted_ptr<T>::operator->() noexcept
+T* counted_ptr<T>::operator->()
 {
     return data;
 }
+//const variant av T*
 
 template <typename T>
 bool counted_ptr<T>::operator==(counted_ptr<T> const& other) const
@@ -113,12 +116,6 @@ template <typename T>
 bool counted_ptr<T>::operator!=(counted_ptr<T> const& other) const
 {
     return data != other.data;
-}
-
-template <typename T>
-bool counted_ptr<T>::operator==(T const* ptr) const
-{
-    return data == ptr;
 }
 
 template <typename T>
@@ -143,6 +140,13 @@ template <typename T>
 bool  counted_ptr<T>::operator!=(std::nullptr_t) const
 {
     return data != nullptr;
+}
+
+//get func
+template <typename T>
+T* counted_ptr<T>::get() const
+{
+    return data;
 }
 
 template <typename T>
