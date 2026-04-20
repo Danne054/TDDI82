@@ -7,6 +7,8 @@
 #include <map>
 #include <iomanip>
 #include <exception>
+#include <filesystem>
+#include <numeric>
 
 std::string find_operation(std::string const& argument, bool const end_part){
     std::string temp { argument };
@@ -35,8 +37,15 @@ std::vector<std::string> get_file(std::string const& file_name){
 }
 
 size_t add_to_map(std::vector<std::string> const& text, std::map<std::string, int> & table){
-    std::for_each(text.begin(), text.end(), [&table](const std::string &word){
-        ++table[word];
+    //std::for_each(text.begin(), text.end(), [&table](const std::string &word){
+     //     ++table[word];
+    //});
+    //hittade accumulate som är till för att sumera värden "vika värden" och hitta ett exempel på ett forum då de gjorde en map
+    //std::ref(table) är till för att den inte ska kopieras varje varv
+    std::accumulate(text.begin(), text.end(), std::ref(table),
+    [](auto& tbl, const std::string& word) -> auto& {
+        ++tbl.get()[word];
+        return tbl;
     });
 
     std::string word_max_len{ };
@@ -57,8 +66,19 @@ void table_func(std::vector<std::string> const& text){
     std::map<std::string, int> table { };
     size_t max_len { add_to_map(text, table) };
     
-    std::for_each(table.begin(), table.end(), [max_len](std::pair<std::string, int> const a){ 
-        std::cout << a.first << std::setw(max_len - a.first.size() + 2) << a.second << std::endl;
+   // std::for_each(table.begin(), table.end(), [max_len](std::pair<std::string, int> const a){ 
+    //   std::cout << a.first << std::setw(max_len - a.first.size() + 2) << a.second << std::endl;
+    //});
+
+    // vi pratade med en assistent om att använda ostringstream 
+    std::transform(table.begin(), table.end(),
+    std::ostream_iterator<std::string>(std::cout, "\n"),
+    [max_len](const auto& p) {
+        std::ostringstream oss;
+        oss << p.first
+            << std::setw(max_len - p.first.size() + 2)
+            << p.second;
+        return oss.str();
     });
 }
 
@@ -73,8 +93,16 @@ void frequency(std::vector<std::string> const& text){
         return a.second > b.second;
     });
 
-    std::for_each(word_count.begin(), word_count.end(), [max_len](std::pair<std::string, int> const a){ 
-        std::cout << std::setw(max_len) << a.first << ' ' << a.second << std::endl;
+   // std::for_each(word_count.begin(), word_count.end(), [max_len](std::pair<std::string, int> const a){ 
+     //   std::cout << std::setw(max_len) << a.first << ' ' << a.second << std::endl;
+    //});
+    //använder transform på samma sätt som på table
+    std::transform(word_count.begin(), word_count.end(),
+    std::ostream_iterator<std::string>(std::cout, "\n"),
+    [max_len](const auto& p) {
+        std::ostringstream oss;
+        oss << std::setw(max_len) << p.first << ' ' << p.second;
+        return oss.str();
     });
 }
 
@@ -132,8 +160,9 @@ std::vector<std::string> get_flags_operators(int argc, char* argv[]){
 }
 
 bool is_a_file(int const argc, std::string const& first_arg){
-    if (argc >= 1){
-        return  std::string { std::find(first_arg.begin(), first_arg.end(), '.'), first_arg.end() } == ".txt";
+    //har ändrat så vi använder Filsystem så den kollar fört längst nere på trädet sedan efter .txt
+    if (argc >= 2){ // ändrade till två istället för ett för tror den också gav fel
+        return std::filesystem::path(first_arg).extension() == ".txt";
     }
 
     return false;
