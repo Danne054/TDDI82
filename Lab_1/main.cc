@@ -58,7 +58,7 @@ void table_func(std::vector<std::string> const& text){
     size_t max_len { add_to_map(text, table) };
     
     std::for_each(table.begin(), table.end(), [max_len](std::pair<std::string, int> const a){ 
-        std::cout << std::setw(max_len) << a.first << ' ' << a.second << std::endl;
+        std::cout << a.first << std::setw(max_len - a.first.size() + 2) << a.second << std::endl;
     });
 }
 
