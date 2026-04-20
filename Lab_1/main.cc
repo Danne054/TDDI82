@@ -7,6 +7,17 @@
 #include <map>
 #include <iomanip>
 #include <exception>
+#include <numeric>
+
+// TODO: Komplettering: Använd inte '.' som avskiljare när ni bekräftar txt-filen. det är viktigt att koden är skalbar, så att man ex. kan använda ../files/short.txt som input.
+//
+// TODO: Komplettering: För många förekomster av for_each(), försöka at använda andra algoritmer.
+//
+// TODO: Komplettering: Bättre felhantering. Användaren måste förstå vilket argument det var som inte gick igenom.
+//
+// TODO: Komplettering: Utskriften av --table matchar inte det givna exemplet.
+//
+// TODO: Komplettering: Kolla över era utskrifter. hur lätt är det att läsa utskriften om användaren ex. skriver "--print --table --frequency"
 
 std::string find_operation(std::string const& argument, bool const end_part){
     std::string temp { argument };
@@ -35,9 +46,17 @@ std::vector<std::string> get_file(std::string const& file_name){
 }
 
 size_t add_to_map(std::vector<std::string> const& text, std::map<std::string, int> & table){
-    std::transform(text.begin(), text.end(), std::inserter(table, table.end()),
-    [&table](std::string const& word) {
-        return std::make_pair(word, ++table[word]);
+    // std::transform(text.begin(), text.end(), std::inserter(table, table.end()),
+    // [&table](std::string const& word) {
+    //     return std::make_pair(word, ++table[word]);
+    // });
+
+    //hittade accumulate som är till för att sumera värden "vika värden" och hitta ett exempel på ett forum då de gjorde en map
+    //std::ref(table) är till för att den inte ska kopieras varje varv
+    std::accumulate(text.begin(), text.end(), std::ref(table),
+    [](auto& tbl, const std::string& word) -> auto& {
+        ++tbl.get()[word];
+        return tbl;
     });
 
     std::string word_max_len{ };
@@ -58,9 +77,16 @@ void print (std::vector<std::string> const& text){
 void table_func(std::vector<std::string> const& text){
     std::map<std::string, int> table { };
     size_t max_len { add_to_map(text, table) };
-    
-    std::for_each(table.begin(), table.end(), [max_len](std::pair<std::string, int> const a){ 
-        std::cout << a.first << std::setw(max_len - a.first.size() + 2) << a.second << '\n';
+
+    // vi pratade med en assistent om att använda ostringstream 
+    std::transform(table.begin(), table.end(), std::ostream_iterator<std::string>(std::cout, "\n"),
+    [max_len](const auto& p) {
+        std::ostringstream oss;
+        oss << p.first
+            << std::setw(max_len - p.first.size() + 2)
+            << p.second;
+
+        return oss.str();
     });
     std::cout << std::endl;
 }
@@ -76,10 +102,15 @@ void frequency(std::vector<std::string> const& text){
         return a.second > b.second;
     });
 
-    std::for_each(word_count.begin(), word_count.end(), [max_len](std::pair<std::string, int> const a){ 
-        std::cout << std::setw(max_len) << a.first << ' ' << a.second << '\n';
+    //använder transform på samma sätt som på table
+    std::transform(word_count.begin(), word_count.end(), std::ostream_iterator<std::string>(std::cout, "\n"),
+    [max_len](const auto& p) {
+        std::ostringstream oss;
+        oss << std::setw(max_len) << p.first << ' ' << p.second;
+
+        return oss.str();
     });
-    std::cout << std::endl;
+  
 }
 
 void substitute(std::vector<std::string> & text, std::string const& argument){
@@ -154,7 +185,7 @@ int main(int argc, char* argv[]){
         execute_flags_operators (arguments, file_text);
     }
     else{
-        std::cout << "file name not valid or type" << std::endl; //fixa, kanske ska skrivas ut
+        std::cout << argv[1] << " is not a valid file name or type" << std::endl; //fixa, kanske ska skrivas ut
     }
 
     return 0;
