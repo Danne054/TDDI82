@@ -35,8 +35,9 @@ std::vector<std::string> get_file(std::string const& file_name){
 }
 
 size_t add_to_map(std::vector<std::string> const& text, std::map<std::string, int> & table){
-    std::for_each(text.begin(), text.end(), [&table](const std::string &word){
-        ++table[word];
+    std::transform(text.begin(), text.end(), std::inserter(table, table.end()),
+    [&table](std::string const& word) {
+        return std::make_pair(word, ++table[word]);
     });
 
     std::string word_max_len{ };
@@ -51,6 +52,7 @@ size_t add_to_map(std::vector<std::string> const& text, std::map<std::string, in
 void print (std::vector<std::string> const& text){
     std::copy(text.begin(), text.end(),
     std::ostream_iterator<std::string>{ std::cout, " " });  
+    std::cout << std::endl;
 }
 
 void table_func(std::vector<std::string> const& text){
@@ -58,8 +60,9 @@ void table_func(std::vector<std::string> const& text){
     size_t max_len { add_to_map(text, table) };
     
     std::for_each(table.begin(), table.end(), [max_len](std::pair<std::string, int> const a){ 
-        std::cout << a.first << std::setw(max_len - a.first.size() + 2) << a.second << std::endl;
+        std::cout << a.first << std::setw(max_len - a.first.size() + 2) << a.second << '\n';
     });
+    std::cout << std::endl;
 }
 
 void frequency(std::vector<std::string> const& text){
@@ -74,8 +77,9 @@ void frequency(std::vector<std::string> const& text){
     });
 
     std::for_each(word_count.begin(), word_count.end(), [max_len](std::pair<std::string, int> const a){ 
-        std::cout << std::setw(max_len) << a.first << ' ' << a.second << std::endl;
+        std::cout << std::setw(max_len) << a.first << ' ' << a.second << '\n';
     });
+    std::cout << std::endl;
 }
 
 void substitute(std::vector<std::string> & text, std::string const& argument){
@@ -132,8 +136,8 @@ std::vector<std::string> get_flags_operators(int argc, char* argv[]){
 }
 
 bool is_a_file(int const argc, std::string const& first_arg){
-    if (argc >= 1){
-        return  std::string { std::find(first_arg.begin(), first_arg.end(), '.'), first_arg.end() } == ".txt";
+    if (argc >= 2 && first_arg.size() >= 4){
+        return  std::string { first_arg.end() - 4 , first_arg.end() } == ".txt";
     }
 
     return false;
