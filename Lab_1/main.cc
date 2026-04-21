@@ -46,10 +46,10 @@ std::vector<std::string> get_file(std::string const& file_name){
 }
 
 size_t add_to_map(std::vector<std::string> const& text, std::map<std::string, int> & table){
-    // std::transform(text.begin(), text.end(), std::inserter(table, table.end()),
-    // [&table](std::string const& word) {
-    //     return std::make_pair(word, ++table[word]);
-    // });
+    std::transform(text.begin(), text.end(), std::inserter(table, table.end()),
+    [&table](std::string const& word) {
+        return std::make_pair(word, ++table[word]);
+    });
 
     //hittade accumulate som är till för att sumera värden "vika värden" och hitta ett exempel på ett forum då de gjorde en map
     //std::ref(table) är till för att den inte ska kopieras varje varv
@@ -117,8 +117,7 @@ void substitute(std::vector<std::string> & text, std::string const& argument){
     std::string replace_with { find_operation(argument, true) };
 
     if (std::count(replace_with.begin(), replace_with.end(), '+') == 0){
-        std::cout << "no '+' found in substitute argument, use: --substitute=<old>+<new>" << std::endl;
-        
+        std::cout << "No '+' found in argument "<< argument <<", use: --substitute=<old>+<new>" << std::endl;
     }
     else{
         auto it = std::find(replace_with.begin(), replace_with.end(), '+');
@@ -154,7 +153,7 @@ void execute_flags_operators(std::vector<std::string> const& arguments, std::vec
             remove(file_text, argument);
         }
         else{ 
-            std::cout << "No matching flag or operator found" << std::endl; 
+            std::cout << "No matching flag or operator found for " << argument << std::endl; 
         }
     });
 }
