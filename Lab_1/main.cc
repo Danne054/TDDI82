@@ -33,15 +33,18 @@ std::string find_operation(std::string const& argument, bool const end_part){
 std::vector<std::string> get_file(std::string const& file_name){
     std::ifstream              ifs{ };
     std::vector<std::string> words{ };
-
+   
     ifs.open(file_name);
-    if (ifs.fail()){ std::cout << file_name << " not found" << std::endl; }
-    
+    if (ifs.fail()){ 
+        std::cout <<"The file "<< file_name << " could not be found!" << std::endl; 
+    }
+
     std::copy(std::istream_iterator<std::string>{ ifs }, 
-              std::istream_iterator<std::string>{ }, 
-              std::back_inserter(words));
+        std::istream_iterator<std::string>{ }, 
+        std::back_inserter(words));
 
     ifs.close();
+
     return words;
 }
 
@@ -49,14 +52,6 @@ size_t add_to_map(std::vector<std::string> const& text, std::map<std::string, in
     std::transform(text.begin(), text.end(), std::inserter(table, table.end()),
     [&table](std::string const& word) {
         return std::make_pair(word, ++table[word]);
-    });
-
-    //hittade accumulate som är till för att sumera värden "vika värden" och hitta ett exempel på ett forum då de gjorde en map
-    //std::ref(table) är till för att den inte ska kopieras varje varv
-    std::accumulate(text.begin(), text.end(), std::ref(table),
-    [](auto& tbl, const std::string& word) -> auto& {
-        ++tbl.get()[word];
-        return tbl;
     });
 
     std::string word_max_len{ };
@@ -78,7 +73,6 @@ void table_func(std::vector<std::string> const& text){
     std::map<std::string, int> table { };
     size_t max_len { add_to_map(text, table) };
 
-    // vi pratade med en assistent om att använda ostringstream 
     std::transform(table.begin(), table.end(), std::ostream_iterator<std::string>(std::cout, "\n"),
     [max_len](const auto& p) {
         std::ostringstream oss;
@@ -88,6 +82,7 @@ void table_func(std::vector<std::string> const& text){
 
         return oss.str();
     });
+
     std::cout << std::endl;
 }
 
@@ -102,7 +97,6 @@ void frequency(std::vector<std::string> const& text){
         return a.second > b.second;
     });
 
-    //använder transform på samma sätt som på table
     std::transform(word_count.begin(), word_count.end(), std::ostream_iterator<std::string>(std::cout, "\n"),
     [max_len](const auto& p) {
         std::ostringstream oss;
@@ -110,7 +104,6 @@ void frequency(std::vector<std::string> const& text){
 
         return oss.str();
     });
-  
 }
 
 void substitute(std::vector<std::string> & text, std::string const& argument){
@@ -136,6 +129,8 @@ void remove(std::vector<std::string> & text, std::string const& argument){
 }
 
 void execute_flags_operators(std::vector<std::string> const& arguments, std::vector<std::string> & file_text){
+    if(file_text.size() <= static_cast<size_t>(0)){ return; }
+
     std::for_each(arguments.begin(), arguments.end(), [&file_text](const std::string &argument) {
         if(argument == "--print"){
             print(file_text);
@@ -153,7 +148,7 @@ void execute_flags_operators(std::vector<std::string> const& arguments, std::vec
             remove(file_text, argument);
         }
         else{ 
-            std::cout << "No matching flag or operator found for " << argument << std::endl; 
+            std::cout << "No matching flag or operator found for: " << argument << std::endl; 
         }
     });
 }
@@ -180,11 +175,11 @@ int main(int argc, char* argv[]){
     if (is_a_file(argc, argv[1])){
         file_text = get_file (argv[1]);
         arguments = get_flags_operators(argc, argv);
-
+        
         execute_flags_operators (arguments, file_text);
     }
     else{
-        std::cout << argv[1] << " is not a valid file name or type" << std::endl; //fixa, kanske ska skrivas ut
+        std::cout << argv[1] << " is not a valid file name or type, please enter file name first!" << std::endl; //fixa, kanske ska skrivas ut
     }
 
     return 0;
